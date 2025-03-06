@@ -74,9 +74,6 @@ defmodule CartCheckout.ProductOffers do
       iex> ProductOffers.update(:GR1, %Offer{name: "Buy More, Pay Less", minimum_purchase: 2, unit: :price, value: 1.00})
       :ok
 
-      iex> ProductOffers.update(:GR1, %Offer{name: "Buy One Get One", minimum_purchase: 1, unit: :quantity, value: 1})
-      :ok
-
       iex> ProductOffers.update(:GR1, %{name: "Buy More, Pay Less", minimum_purchase: 2, unit: :price, value: 1.00})
       :ok
   """

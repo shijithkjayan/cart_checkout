@@ -7,6 +7,11 @@ defmodule CartCheckout.ProductOffersTest do
   alias CartCheckout.Offer
   alias CartCheckout.ProductOffers
 
+  setup do
+    start_supervised(ProductOffers)
+    on_exit(fn -> Supervisor.terminate_child(CartCheckout.Supervisor, ProductOffers) end)
+  end
+
   doctest ProductOffers
 
   test "starts the agent with base offers" do
@@ -58,13 +63,8 @@ defmodule CartCheckout.ProductOffersTest do
         value: 1.00
       }
 
-      old_offer = ProductOffers.get(:GR1)
-
       assert :ok == ProductOffers.update(:GR1, offer)
       assert offer == ProductOffers.get(:GR1)
-
-      # To avoid random test failures because of async test execution
-      assert :ok == ProductOffers.update(:GR1, old_offer)
     end
 
     test "logs an error for an invalid offer" do
