@@ -1,5 +1,5 @@
 defmodule CartCheckout.OfferTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias CartCheckout.Offer
   alias CartCheckout.ProductOffers

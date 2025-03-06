@@ -1,5 +1,5 @@
 defmodule CartCheckoutTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case, async: false
 
   alias CartCheckout.Cart
   alias CartCheckout.Cart.Item
@@ -9,7 +9,7 @@ defmodule CartCheckoutTest do
   doctest CartCheckout
 
   setup do
-    start_supervised(CartCheckout.ProductOffers)
+    start_supervised(ProductOffers)
     on_exit(fn -> Supervisor.terminate_child(CartCheckout.Supervisor, ProductOffers) end)
   end
 
