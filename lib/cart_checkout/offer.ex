@@ -27,17 +27,23 @@ defmodule CartCheckout.Offer do
 
   ## Examples
       iex> Offer.calculate_bonus_quantity(:GR1, 1)
-      1
+      0
 
       iex> Offer.calculate_bonus_quantity(:GR1, 2)
+      1
+
+      iex> Offer.calculate_bonus_quantity(:GR1, 3)
+      1
+
+      iex> Offer.calculate_bonus_quantity(:GR1, 4)
       2
   """
   @spec calculate_bonus_quantity(atom(), integer()) :: integer()
   def calculate_bonus_quantity(product_code, quantity) do
     case ProductOffers.get(product_code) do
       %Offer{unit: :quantity, minimum_purchase: min, value: bonus_value} when quantity >= min ->
-        bonus_sets = div(quantity, min)
-        bonus_sets * trunc(bonus_value)
+        total_sets = div(quantity, min)
+        bonus_value * total_sets
 
       _ ->
         0

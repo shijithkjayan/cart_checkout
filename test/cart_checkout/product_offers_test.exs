@@ -17,7 +17,7 @@ defmodule CartCheckout.ProductOffersTest do
   test "starts the agent with base offers" do
     assert %Offer{
              name: "Buy One Get One",
-             minimum_purchase: 1,
+             minimum_purchase: 2,
              unit: :quantity,
              value: 1
            } == ProductOffers.get(:GR1)
@@ -41,7 +41,7 @@ defmodule CartCheckout.ProductOffersTest do
     test "returns the offer for a product" do
       offer = %Offer{
         name: "Buy One Get One",
-        minimum_purchase: 1,
+        minimum_purchase: 2,
         unit: :quantity,
         value: 1
       }

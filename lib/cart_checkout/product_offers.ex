@@ -14,7 +14,7 @@ defmodule CartCheckout.ProductOffers do
   @base_offers %{
     GR1: %Offer{
       name: "Buy One Get One",
-      minimum_purchase: 1,
+      minimum_purchase: 2,
       unit: :quantity,
       value: 1
     },
@@ -50,7 +50,7 @@ defmodule CartCheckout.ProductOffers do
   ## Examples
 
       iex> ProductOffers.get(:GR1)
-      %Offer{name: "Buy One Get One", minimum_purchase: 1, unit: :quantity, value: 1}
+      %Offer{name: "Buy One Get One", minimum_purchase: 2, unit: :quantity, value: 1}
 
       iex> ProductOffers.get(:UNKNOWN)
       nil
@@ -71,10 +71,10 @@ defmodule CartCheckout.ProductOffers do
 
   ## Examples
 
-      iex> ProductOffers.update(:GR1, %Offer{name: "Buy More, Pay Less", minimum_purchase: 2, unit: :price, value: 1.00})
+      iex> ProductOffers.update(:GR1, %Offer{name: "Buy More, Pay Less", minimum_purchase: 3, unit: :price, value: 1})
       :ok
 
-      iex> ProductOffers.update(:GR1, %{name: "Buy More, Pay Less", minimum_purchase: 2, unit: :price, value: 1.00})
+      iex> ProductOffers.update(:GR1, %{name: "Buy More, Pay Less", minimum_purchase: 3, unit: :price, value: 1})
       :ok
   """
   @spec update(String.t(), Offer.t()) :: :ok

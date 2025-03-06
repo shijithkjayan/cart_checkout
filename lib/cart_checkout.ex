@@ -44,14 +44,19 @@ defmodule CartCheckout do
       Map.get_and_update(items, product_code, fn
         nil ->
           bonus_quantity = Offer.calculate_bonus_quantity(product_code, quantity)
-          {nil, %Item{purchased_quantity: quantity, bonus_quantity: bonus_quantity}}
+
+          {nil,
+           %Item{purchased_quantity: quantity - bonus_quantity, bonus_quantity: bonus_quantity}}
 
         item ->
-          new_purchased_quantity = item.purchased_quantity + quantity
-          bonus_quantity = Offer.calculate_bonus_quantity(product_code, new_purchased_quantity)
+          total_quantity = item.purchased_quantity + item.bonus_quantity + quantity
+          bonus_quantity = Offer.calculate_bonus_quantity(product_code, total_quantity)
 
           {item,
-           %Item{purchased_quantity: new_purchased_quantity, bonus_quantity: bonus_quantity}}
+           %Item{
+             purchased_quantity: total_quantity - bonus_quantity,
+             bonus_quantity: bonus_quantity
+           }}
       end)
 
     %Cart{items: items}

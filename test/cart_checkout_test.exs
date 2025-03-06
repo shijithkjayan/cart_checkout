@@ -3,7 +3,6 @@ defmodule CartCheckoutTest do
 
   alias CartCheckout.Cart
   alias CartCheckout.Cart.Item
-  alias CartCheckout.Offer
   alias CartCheckout.ProductOffers
 
   doctest CartCheckout
@@ -44,29 +43,35 @@ defmodule CartCheckoutTest do
     end
 
     test "does not add bonus quantity if minimum purchase requirement is not met", %{cart: cart} do
-      ProductOffers.update(:GR1, %Offer{unit: :quantity, minimum_purchase: 2, value: 1})
       cart = CartCheckout.scan_item(cart, :GR1, 1)
       assert %Cart{items: %{GR1: %Item{purchased_quantity: 1, bonus_quantity: 0}}} = cart
     end
 
     test "adds bonus quanity if minimum purchase requirement is met", %{cart: cart} do
-      # Add first coffee - 1 bonus
+      cart = CartCheckout.scan_item(cart, :GR1, 1)
+      assert %Cart{items: %{GR1: %Item{purchased_quantity: 1, bonus_quantity: 0}}} = cart
+
+      # Add second Green teas - 1 bonus
       cart = CartCheckout.scan_item(cart, :GR1, 1)
       assert %{purchased_quantity: 1, bonus_quantity: 1} = cart.items[:GR1]
 
-      # Add second coffee - get 1 free for each (total 4)
+      # Add third Green teas - 1 bonus (total 3)
+      cart = CartCheckout.scan_item(cart, :GR1, 1)
+      assert %{purchased_quantity: 2, bonus_quantity: 1} = cart.items[:GR1]
+
+      # Add fourth Green teas - get 2 free (total 4)
       cart = CartCheckout.scan_item(cart, :GR1, 1)
       assert %{purchased_quantity: 2, bonus_quantity: 2} = cart.items[:GR1]
-
-      # Add third coffee - get 3 free (total 6)
-      cart = CartCheckout.scan_item(cart, :GR1, 1)
-      assert %{purchased_quantity: 3, bonus_quantity: 3} = cart.items[:GR1]
     end
 
     test "adds bonus quanity if minimum purchase requirement is met with multiple quantities", %{
       cart: cart
     } do
-      # Adding 2 at once should result in 4 (2 + 1 free for each)
+      # Adding 2 at once should result in 1 bonus quantity
+      cart = CartCheckout.scan_item(cart, :GR1, 2)
+      assert %{purchased_quantity: 1, bonus_quantity: 1} = cart.items[:GR1]
+
+      # Adding 2 more should result in 2 bonus quantity
       cart = CartCheckout.scan_item(cart, :GR1, 2)
       assert %{purchased_quantity: 2, bonus_quantity: 2} = cart.items[:GR1]
 

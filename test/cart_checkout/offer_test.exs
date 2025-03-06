@@ -13,9 +13,10 @@ defmodule CartCheckout.OfferTest do
 
   describe "calculate_bonus_quantity/2 " do
     test "calculates the bonus quantity for the product when it has quantity offer" do
-      assert Offer.calculate_bonus_quantity(:GR1, 1) == 1
-      assert Offer.calculate_bonus_quantity(:GR1, 2) == 2
-      assert Offer.calculate_bonus_quantity(:GR1, 3) == 3
+      assert Offer.calculate_bonus_quantity(:GR1, 1) == 0
+      assert Offer.calculate_bonus_quantity(:GR1, 2) == 1
+      assert Offer.calculate_bonus_quantity(:GR1, 3) == 1
+      assert Offer.calculate_bonus_quantity(:GR1, 4) == 2
     end
 
     test "returns zero if product does not have quantity offer" do
