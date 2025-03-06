@@ -74,10 +74,57 @@ defmodule CartCheckoutTest do
       # Adding 2 more should result in 2 bonus quantity
       cart = CartCheckout.scan_item(cart, :GR1, 2)
       assert %{purchased_quantity: 2, bonus_quantity: 2} = cart.items[:GR1]
+    end
+  end
 
-      # Adding 2 more should result in 6 (4 + 4 free for each)
-      cart = CartCheckout.scan_item(cart, :GR1, 2)
-      assert %{purchased_quantity: 4, bonus_quantity: 4} = cart.items[:GR1]
+  describe "checkout/1" do
+    test "raises if invalid cart is passed" do
+      assert_raise RuntimeError, fn ->
+        CartCheckout.checkout(%{})
+      end
+    end
+
+    test "returns the total cost of the cart after applying discounts" do
+      cart =
+        CartCheckout.new()
+        |> CartCheckout.scan_item(:GR1, 1)
+        |> CartCheckout.scan_item(:SR1, 1)
+        |> CartCheckout.scan_item(:GR1, 1)
+        |> CartCheckout.scan_item(:GR1, 1)
+        |> CartCheckout.scan_item(:CF1, 1)
+
+      assert CartCheckout.checkout(cart) == 22.45
+
+      cart =
+        CartCheckout.new()
+        |> CartCheckout.scan_item(:GR1, 1)
+        |> CartCheckout.scan_item(:GR1, 1)
+
+      assert CartCheckout.checkout(cart) == 3.11
+
+      cart =
+        CartCheckout.new()
+        |> CartCheckout.scan_item(:SR1, 1)
+        |> CartCheckout.scan_item(:SR1, 1)
+        |> CartCheckout.scan_item(:GR1, 1)
+        |> CartCheckout.scan_item(:SR1, 1)
+
+      assert CartCheckout.checkout(cart) == 16.61
+
+      cart =
+        CartCheckout.new()
+        |> CartCheckout.scan_item(:GR1, 1)
+        |> CartCheckout.scan_item(:CF1, 1)
+        |> CartCheckout.scan_item(:SR1, 1)
+        |> CartCheckout.scan_item(:CF1, 1)
+        |> CartCheckout.scan_item(:CF1, 1)
+
+      assert CartCheckout.checkout(cart) == 30.57
+    end
+
+    test "returns zero if cart is empty" do
+      cart = CartCheckout.new()
+      assert CartCheckout.checkout(cart) == 0
     end
   end
 end

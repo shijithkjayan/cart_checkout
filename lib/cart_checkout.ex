@@ -8,20 +8,12 @@ defmodule CartCheckout do
   alias CartCheckout.Cart
   alias CartCheckout.Cart.Item
   alias CartCheckout.Offer
+  alias CartCheckout.ProductOffers
 
   @pricing %{
-    GR1: %{
-      name: "Green Tea",
-      price: 3.11
-    },
-    SR1: %{
-      name: "Strawberries",
-      price: 5.00
-    },
-    CF1: %{
-      name: "Coffee",
-      price: 11.23
-    }
+    GR1: 3.11,
+    SR1: 5.00,
+    CF1: 11.23
   }
 
   @product_codes Map.keys(@pricing)
@@ -64,4 +56,37 @@ defmodule CartCheckout do
 
   def scan_item(_, product_code, _) when product_code not in @product_codes,
     do: raise("Invalid product code: #{product_code}")
+
+  @doc """
+  Calculates the total cost of the cart after applying discounts.
+
+  ## Examples
+
+      iex> cart = CartCheckout.new()
+      ...> |> CartCheckout.scan_item(:GR1, 1)
+      ...> |> CartCheckout.scan_item(:CF1, 1)
+      ...> |> CartCheckout.scan_item(:GR1, 3)
+      iex> CartCheckout.checkout(cart)
+      17.45
+  """
+  @spec checkout(Cart.t()) :: float()
+  def checkout(%Cart{items: items}) do
+    items
+    |> Enum.reduce(0.0, fn {product_code, item}, total ->
+      mrp = Map.get(@pricing, product_code)
+      discounted_price_per_purchased_item = get_discounted_price(mrp, product_code, item)
+      final_price = discounted_price_per_purchased_item * item.purchased_quantity
+
+      total + final_price
+    end)
+    |> Float.round(2)
+  end
+
+  def checkout(_), do: raise("Invalid cart")
+
+  # Private functions
+  defp get_discounted_price(mrp, product_code, %Item{purchased_quantity: quantity}) do
+    offer = ProductOffers.get(product_code)
+    Offer.calculate_discounted_price(mrp, offer, quantity)
+  end
 end

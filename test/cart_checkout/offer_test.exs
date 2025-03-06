@@ -30,4 +30,38 @@ defmodule CartCheckout.OfferTest do
       assert Offer.calculate_bonus_quantity(:GR1, 2) == 1
     end
   end
+
+  describe "calculate_discounted_price/2" do
+    test "calculates the bonus price for the product when it has price offer and meets minimum required purchase" do
+      offer = %Offer{minimum_purchase: 3, unit: :price, value: 0.50}
+      assert Offer.calculate_discounted_price(5, offer, 1) == 5.0
+      assert Offer.calculate_discounted_price(5, offer, 2) == 5.0
+      assert Offer.calculate_discounted_price(5, offer, 3) == 4.50
+      assert Offer.calculate_discounted_price(5, offer, 4) == 4.50
+    end
+
+    test "calculates the bonus price for the product whtn it has percentage offer and meets minimum required purchase" do
+      offer = %Offer{minimum_purchase: 3, unit: :percent, value: 25.0}
+      assert Offer.calculate_discounted_price(100, offer, 1) == 100
+      assert Offer.calculate_discounted_price(100, offer, 2) == 100
+      assert Offer.calculate_discounted_price(100, offer, 3) == 75.0
+    end
+
+    test "returns MRP if the product has quantity offer" do
+      offer = %Offer{minimum_purchase: 1, unit: :quantity, value: 1}
+      assert Offer.calculate_discounted_price(3.11, offer, 1) == 3.11
+      assert Offer.calculate_discounted_price(3.11, offer, 2) == 3.11
+    end
+
+    test "returns MRP if the product has unknown offer unit" do
+      offer = %Offer{minimum_purchase: 1, unit: :new, value: 4}
+
+      assert Offer.calculate_discounted_price(3.11, offer, 3) == 3.11
+    end
+
+    test "returns MRP if the minimum purchase is not met" do
+      offer = %Offer{minimum_purchase: 3, unit: :price, value: 0.50}
+      assert Offer.calculate_discounted_price(3.11, offer, 2) == 3.11
+    end
+  end
 end
