@@ -5,6 +5,7 @@ defmodule CartCheckout do
   This module is responsible for handling the cart and its items.
   """
 
+  alias __MODULE__
   alias CartCheckout.Cart
   alias CartCheckout.Cart.Item
   alias CartCheckout.Offer
@@ -17,6 +18,14 @@ defmodule CartCheckout do
   }
 
   @product_codes Map.keys(@pricing)
+
+  defmodule Error do
+    @moduledoc """
+    Custom error struct for CartCheckout.
+    """
+    defexception [:message, :metadata]
+    @type t :: %__MODULE__{message: String.t(), metadata: map()}
+  end
 
   @doc """
   Creates a new, empty cart.
@@ -58,7 +67,7 @@ defmodule CartCheckout do
   """
   @spec scan_item(Cart.t(), atom(), integer()) :: Cart.t()
   def scan_item(%Cart{items: items}, product_code, quantity)
-      when product_code in @product_codes do
+      when product_code in @product_codes and quantity > 0 do
     {_, items} =
       Map.get_and_update(items, product_code, fn
         nil ->
@@ -82,7 +91,15 @@ defmodule CartCheckout do
   end
 
   def scan_item(_, product_code, _) when product_code not in @product_codes,
-    do: raise("Invalid product code: #{product_code}")
+    do: {:error, %Error{message: "Invalid product code", metadata: %{product_code: product_code}}}
+
+  def scan_item(_, _, quantity) when quantity <= 0,
+    do:
+      {:error,
+       %Error{message: "Quantity must be greater than 0", metadata: %{quantity: quantity}}}
+
+  def scan_item(cart, _, _),
+    do: {:error, %Error{message: "Invalid cart, expected %Cart{}", metadata: %{cart: cart}}}
 
   @doc """
   Calculates the total cost of the cart after applying discounts.
@@ -127,7 +144,8 @@ defmodule CartCheckout do
     |> Float.round(2)
   end
 
-  def checkout(_), do: raise("Invalid cart")
+  def checkout(cart),
+    do: {:error, %Error{message: "Invalid cart, expected %Cart{}", metadata: %{cart: cart}}}
 
   # Private functions
   defp get_discounted_price(mrp, product_code, %Item{purchased_quantity: quantity}) do

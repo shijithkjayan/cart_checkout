@@ -67,6 +67,34 @@ defmodule CartCheckout.ProductOffersTest do
       assert offer == ProductOffers.get(:GR1)
     end
 
+    test "logs an error for an invalid minimum purchase" do
+      offer = %Offer{
+        name: "Buy More, Pay Less",
+        minimum_purchase: -1,
+        unit: :price,
+        value: 1.00
+      }
+
+      {result, log} = with_log(fn -> ProductOffers.update(:GR1, offer) end)
+
+      assert :ok == result
+      assert log =~ "Minimum purchase and value should be greater than 0, got: #{inspect(offer)}"
+    end
+
+    test "logs an error for an invalid value" do
+      offer = %Offer{
+        name: "Buy More, Pay Less",
+        minimum_purchase: 2,
+        unit: :price,
+        value: -1.00
+      }
+
+      {result, log} = with_log(fn -> ProductOffers.update(:GR1, offer) end)
+
+      assert :ok == result
+      assert log =~ "Minimum purchase and value should be greater than 0, got: #{inspect(offer)}"
+    end
+
     test "logs an error for an invalid offer" do
       offer = %{
         name: "Buy More, Pay Less",

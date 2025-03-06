@@ -3,6 +3,7 @@ defmodule CartCheckoutTest do
 
   alias CartCheckout.Cart
   alias CartCheckout.Cart.Item
+  alias CartCheckout.Error
   alias CartCheckout.ProductOffers
 
   doctest CartCheckout
@@ -24,16 +25,21 @@ defmodule CartCheckoutTest do
       %{cart: cart}
     end
 
-    test "raises if invalid cart is not passed" do
-      assert_raise FunctionClauseError, fn ->
-        CartCheckout.scan_item(%{}, :GR1, 1)
-      end
+    test "returns error tuple if invalid cart is passed" do
+      assert {:error, %Error{message: "Invalid cart, expected %Cart{}", metadata: %{cart: %{}}}} =
+               CartCheckout.scan_item(%{}, :GR1, 1)
     end
 
-    test "raises if invalid product code is passed", %{cart: cart} do
-      assert_raise RuntimeError, fn ->
-        CartCheckout.scan_item(cart, :UNKNOWN, 1)
-      end
+    test "returns error tuple if invalid product code is passed", %{cart: cart} do
+      assert {:error,
+              %Error{message: "Invalid product code", metadata: %{product_code: :UNKNOWN}}} =
+               CartCheckout.scan_item(cart, :UNKNOWN, 1)
+    end
+
+    test "returns error tuple if invalid quantity is passed", %{cart: cart} do
+      assert {:error,
+              %Error{message: "Quantity must be greater than 0", metadata: %{quantity: 0}}} =
+               CartCheckout.scan_item(cart, :GR1, 0)
     end
 
     test "adds a new item to the cart with the given quantity if thers is no quanity offer for the product",
@@ -78,10 +84,9 @@ defmodule CartCheckoutTest do
   end
 
   describe "checkout/1" do
-    test "raises if invalid cart is passed" do
-      assert_raise RuntimeError, fn ->
-        CartCheckout.checkout(%{})
-      end
+    test "returns error tuple if invalid cart is passed" do
+      assert {:error, %Error{message: "Invalid cart, expected %Cart{}", metadata: %{cart: %{}}}} =
+               CartCheckout.checkout(%{})
     end
 
     test "returns the total cost of the cart after applying discounts" do

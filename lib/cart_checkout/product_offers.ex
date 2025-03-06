@@ -78,8 +78,14 @@ defmodule CartCheckout.ProductOffers do
       :ok
   """
   @spec update(String.t(), Offer.t()) :: :ok
-  def update(product_code, %Offer{} = offer) do
+  def update(product_code, %Offer{minimum_purchase: min, value: value} = offer)
+      when min > 0 and value > 0 do
     Agent.update(__MODULE__, fn offers -> Map.put(offers, product_code, offer) end)
+  end
+
+  def update(_product_code, %Offer{} = offer) do
+    Logger.error("Minimum purchase and value should be greater than 0, got: #{inspect(offer)}")
+    :ok
   end
 
   def update(_product_code, offer) do
