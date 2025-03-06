@@ -1,18 +1,20 @@
 defmodule CartCheckout do
   @moduledoc """
-  Documentation for `CartCheckout`.
+  High-level module for the CartCheckout application.
+
+  This module is responsible for handling the cart and its items.
   """
 
+  alias CartCheckout.Cart
+
   @doc """
-  Hello world.
+  Creates a new, empty cart.
 
   ## Examples
 
-      iex> CartCheckout.hello()
-      :world
-
+      iex> CartCheckout.new()
+      %Cart{}
   """
-  def hello do
-    :world
-  end
+  @spec new() :: Cart.t()
+  def new, do: %Cart{}
 end
