@@ -1,11 +1,13 @@
 defmodule CartCheckout.ProductOffersTest do
   @moduledoc false
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   import ExUnit.CaptureLog
 
   alias CartCheckout.Offer
   alias CartCheckout.ProductOffers
+
+  doctest ProductOffers
 
   test "starts the agent with base offers" do
     assert %Offer{
