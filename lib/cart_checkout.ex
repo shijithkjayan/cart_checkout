@@ -29,6 +29,33 @@ defmodule CartCheckout do
   @spec new() :: Cart.t()
   def new, do: %Cart{}
 
+  @doc """
+  Scans an item and adds it to the cart.
+  Checks if the product has a quantity offer and calculates any bonus items.
+
+  The total quantity in the cart is split between purchased and bonus quantities:
+  - For new items: If adding 2 items triggers a "buy one get one free" offer,
+    it will store 1 as purchased_quantity and 1 as bonus_quantity
+  - For existing items: Recalculates the split based on the new total.
+    For example, with "buy one get one free":
+    * Adding 1 item: 1 purchased, 0 bonus
+    * Adding 1 more: 1 purchased, 1 bonus (total 2)
+    * Adding 1 more: 2 purchased, 1 bonus (total 3)
+    * Adding 1 more: 2 purchased, 2 bonus (total 4)
+
+  Raises an error if the product code is invalid or if the cart is invalid.
+
+  ## Examples
+
+      iex> CartCheckout.new()
+      ...> |> CartCheckout.scan_item(:GR1, 1)
+      %Cart{items: %{GR1: %Item{purchased_quantity: 1, bonus_quantity: 0}}}
+
+      iex> CartCheckout.new()
+      ...> |> CartCheckout.scan_item(:GR1, 1)
+      ...> |> CartCheckout.scan_item(:GR1, 1)
+      %Cart{items: %{GR1: %Item{purchased_quantity: 1, bonus_quantity: 1}}}
+  """
   @spec scan_item(Cart.t(), atom(), integer()) :: Cart.t()
   def scan_item(%Cart{items: items}, product_code, quantity)
       when product_code in @product_codes do
@@ -59,6 +86,24 @@ defmodule CartCheckout do
 
   @doc """
   Calculates the total cost of the cart after applying discounts.
+
+  The total calculation process:
+  1. For each item in the cart:
+     - Gets the item's base price (MRP)
+     - Checks if there's a price-based offer (fixed price or percentage discount)
+     - Calculates the discounted price per item
+     - Multiplies the discounted price by the purchased quantity only
+       (bonus items are free)
+  2. Sums up all item totals
+  3. Rounds the final amount to 2 decimal places
+
+  For example:
+  - Green tea (GR1) at £3.11: Buy one get one free
+    * Buying 3 = 2 purchased (£6.22) + 1 bonus (free) = £6.22
+  - Strawberries (SR1) at £5.00: Buy 3 or more and pay £4.50 each
+    * Buying 3 = 3 purchased at £4.50 each = £13.50
+  - Coffee (CF1) at £11.23: Buy 3 or more and get 33.33% off
+    * Buying 3 = 3 purchased at £7.49 each = £22.47
 
   ## Examples
 
