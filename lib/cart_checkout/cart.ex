@@ -22,8 +22,9 @@ defmodule CartCheckout.Cart do
     It has a single field `quantity` which represents the quantity of the item.
     """
     @type t :: %__MODULE__{
-            quantity: integer()
+            purchased_quantity: integer(),
+            bonus_quantity: integer()
           }
-    defstruct quantity: 0
+    defstruct purchased_quantity: 0, bonus_quantity: 0
   end
 end
