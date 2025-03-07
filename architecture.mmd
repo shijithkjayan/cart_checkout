@@ -1,0 +1,32 @@
+graph TB
+    subgraph Application
+        A[CartCheckout.Application] -->|"Supervises and manages"| B[Supervisor]
+    end
+
+    subgraph Core Components
+        C[CartCheckout] -->|"Coordinates cart operations"| D[Cart]
+        C -->|"Manages discounts"| E[Offer]
+        C -->|"Configures rules"| F[ProductOffers]
+    end
+
+    subgraph Cart Management
+        D -->|"Updates cart state"| G[Add Items]
+        D -->|"Computes price"| I[Calculate Total]
+    end
+
+    subgraph Offer System
+        E -->|"Processes discounts"| J[Apply Offers]
+        E -->|"Computes savings"| K[Calculate Discounts]
+        F -->|"Defines rules"| L[Manage Product Offers]
+        F -->|"Sets conditions"| M[Define Offer Rules]
+    end
+
+    B -->|"Initializes and monitors"| C
+
+classDef default fill:#f9f9f9,stroke:#333,stroke-width:2px;
+classDef module fill:#e1f3d8,stroke:#82c91e,stroke-width:2px;
+classDef component fill:#fff3bf,stroke:#fab005,stroke-width:2px;
+
+class A,B default;
+class C,D,E,F module;
+class G,I,J,K,L,M component;
