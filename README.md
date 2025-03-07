@@ -69,4 +69,8 @@ Potential enhancements that could be added:
 2. Remove products from cart
 3. Clear entire cart
 
+## Possible Improvements
+1. Use a struct for products, and have a structured way for managing products, similar to offer and cart.
+2. Add CI pipeline for maintaining code quality and security.
+
 
